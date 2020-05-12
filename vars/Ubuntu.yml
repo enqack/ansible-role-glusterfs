@@ -1,0 +1,11 @@
+---
+
+# defines Ubuntu repo for GlusterFS
+glusterfs_repo_info:
+  keyserver: keyserver.ubuntu.com
+  id: F7C73FCC930AC9F83B387A5613E01B7B3FE869A9
+  repo: "deb http://ppa.launchpad.net/gluster/glusterfs-{{ glusterfs_version }}/{{ ansible_distribution|lower }} {{ ansible_distribution_release|lower }} main "
+
+glusterfs_glusterd_service: glusterd.service
+
+glusterfs_glustereventsd_service: glustereventsd.service

@@ -1,0 +1,19 @@
+---
+# tasks file for enqack.glusterfs
+
+- name: Create mount point directory
+  file:
+    path: "{{ item.mountpoint }}"
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    state: directory
+  with_items: '{{ glusterfs_client_mounts }}'
+
+- name: Mount gluster volumes
+  mount:
+    name: "{{ item.mountpoint }}"
+    src: "{{ item.src }}"
+    fstype: "{{ item.fstype }}"
+    opts: "{{ item.opts|default ('omit') }}"
+    state: "{{ item.state }}"
+  with_items: '{{ glusterfs_client_mounts }}'

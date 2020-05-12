@@ -1,0 +1,57 @@
+---
+# tasks file for enqack.glusterfs
+
+- name: Connect gluster peers
+  gluster_peer:
+    state: present
+    nodes: "{{ groups[glusterfs_server_group_name] }}"
+  delegate_to: "{{ glusterfs_server_master }}"
+  when: >
+        ((groups[glusterfs_arbiter_group_name] is defined and
+        inventory_hostname not in groups[glusterfs_arbiter_group_name]) or
+        groups[glusterfs_arbiter_group_name] is not defined)
+
+- name: Create bricks
+  file:
+    path: "{{ glusterfs_brick_dir }}/{{ item.name }}/"
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    state: directory
+  with_items: "{{ glusterfs_create_volumes }}"
+  when: >
+        ((groups[glusterfs_arbiter_group_name] is defined and
+        inventory_hostname not in groups[glusterfs_arbiter_group_name]) or
+        groups[glusterfs_arbiter_group_name] is not defined)
+
+- name: Capture gluster volumes
+  command: "gluster volume list"
+  register: "gluster_volumes"
+  check_mode: no
+  changed_when: false
+
+- name: Create gluster volume (replicas == 1)
+  gluster_volume:
+    state: present
+    name: "{{ item.name }}"
+    brick: "{{ glusterfs_brick_dir }}/{{ item.name }}"
+    force: "{{ glusterfs_volume_force_create }}"
+    cluster: "{% for host in groups[glusterfs_server_group_name] %}{{ host }}{% if not loop.last %},{% endif %}{% endfor %}"
+  with_items: "{{ glusterfs_create_volumes }}"
+  when: >
+        inventory_hostname == glusterfs_server_master and
+        item.name not in gluster_volumes.stdout and
+        groups[glusterfs_server_group_name]|length == 1
+
+- name: Create gluster volume (replicas > 1)
+  gluster_volume:
+    state: present
+    name: "{{ item.name }}"
+    brick: "{{ glusterfs_brick_dir }}/{{ item.name }}"
+    force: "{{ glusterfs_volume_force_create }}"
+    replicas: "{{ groups[glusterfs_server_group_name]|length }}"
+    cluster: "{% for host in groups[glusterfs_server_group_name] %}{{ host }}{% if not loop.last %},{% endif %}{% endfor %}"
+  with_items: "{{ glusterfs_create_volumes }}"
+  when: >
+        inventory_hostname == glusterfs_server_master and
+        item.name not in gluster_volumes.stdout and
+        groups[glusterfs_server_group_name]|length > 1

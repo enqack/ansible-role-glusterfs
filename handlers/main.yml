@@ -1,0 +1,26 @@
+---
+# handlers file for enqack.glusterfs
+
+- name: enable glusterd
+  service:
+    name: "{{ glusterfs_glusterd_service }}"
+    state: started
+    enable: true
+
+- name: enable glustereventsd
+  service:
+    name: "{{ glusterfs_glustereventsd_service }}"
+    state: started
+    enable: true
+  when: glusterfs_glustereventsd_service is defined
+
+- name: restart glusterd
+  service:
+    name: "{{ glusterfs_glusterd_service }}"
+    state: restarted
+
+- name: restart glustereventsd
+  service:
+    name: "{{ glusterfs_glustereventsd_service }}"
+    state: restarted
+  when: glusterfs_glustereventsd_service is defined

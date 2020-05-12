@@ -1,0 +1,8 @@
+---
+
+# defines Debian repo for GlusterFS
+glusterfs_repo_info:
+  key_url: "https://download.gluster.org/pub/gluster/glusterfs/{{ glusterfs_version }}/rsa.pub"
+  repo: "deb http://download.gluster.org/pub/gluster/glusterfs/{{ glusterfs_version }}/LATEST/Debian/{{ ansible_distribution_release|lower }}/apt {{ ansible_distribution_release|lower }} main"
+
+glusterfs_glusterd_service: glusterd.service

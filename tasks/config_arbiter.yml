@@ -1,0 +1,17 @@
+---
+# tasks file for enqack.glusterfs
+
+- name: Connect arbiter node
+  shell: gluster peer probe {{ item }}
+  register: gluster_peer_probe
+  changed_when: "'already in peer list' not in gluster_peer_probe.stdout"
+  delegate_to: "{{ glusterfs_server_master }}"
+  with_items: '{{ groups[glusterfs_arbiter_group_name] }}'
+
+- name: Create arbiter brick mount # contains meta-data for volumes
+  file:
+    path: "{{ glusterfs_brick_dir }}"
+    owner: root
+    group: root
+    state: directory
+  when: inventory_hostname in groups[glusterfs_arbiter_group_name]

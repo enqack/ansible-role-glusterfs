@@ -1,0 +1,56 @@
+---
+# defaults file for enqack.glusterfs
+
+glusterfs_version: 6
+
+# if glusterfs should be configured
+config_glusterfs: false
+
+# mountpoint for gluster bricks and volumes to be created
+glusterfs_brick_dir: /data/glusterfs
+
+# inventory group for clients
+glusterfs_client_group_name: glusterfs_client_nodes
+
+# inventory group for servers
+glusterfs_server_group_name: glusterfs_server_nodes
+
+# inventory group for arbiter nodes
+glusterfs_arbiter_group_name: glusterfs_arbiter_nodes
+
+glusterfs_client_mounts: []
+  # - mountpoint: /mnt/db
+  #   src: '{{ glusterfs_primary_server }}:/db'
+  #   fstype: 'glusterfs'
+  #   opts: 'defaults,_netdev,backupvolfile-server={{ glusterfs_secondary_server }}'
+  #   state: mounted
+  # - mountpoint: /mnt/web
+  #   src: '{{ glusterfs_primary_server }}:/web'
+  #   fstype: 'glusterfs'
+  #   opts: 'defaults,_netdev,backupvolfile-server={{ glusterfs_secondary_server }}'
+  #   state: mounted
+
+# glusterfs volumes to create
+glusterfs_create_volumes: []
+  # - name: db
+  #   owner: root
+  #   group: root
+  # - name: web
+  #   owner: root
+  #   group: root
+
+# define if arbiter nodes should be managed or added to cluster
+glusterfs_manage_arbiter_nodes: false
+
+# primary server for clients to connect to
+glusterfs_primary_server: '{{ glusterfs_server_master }}'
+
+# secondary server for clients to connect to
+glusterfs_secondary_server: "{{ groups[glusterfs_server_group_name][1] }}"
+
+# node to be considered as glusterfs master
+glusterfs_server_master: "{{ groups[glusterfs_server_group_name][0] }}"
+
+# If brick is being created in the root partition, module will fail.
+# Set force to true to override this behaviour.
+glusterfs_volume_force_create: false

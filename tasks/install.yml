@@ -1,0 +1,23 @@
+---
+# tasks file for enqack.glusterfs
+
+- name: Install glusterfs server
+  package:
+    name: "glusterfs-server"
+    state: latest
+  when: >
+        (groups[glusterfs_server_group_name] is defined and
+        inventory_hostname in groups[glusterfs_server_group_name]) or
+        (groups[glusterfs_arbiter_group_name] is defined and
+        inventory_hostname in groups[glusterfs_arbiter_group_name])
+  notify:
+    - enable glusterd
+    - enable glustereventsd
+
+- name: Install glusterfs client
+  package:
+    name: "glusterfs-client"
+    state: latest
+  when: >
+        groups[glusterfs_client_group_name] is defined and
+        inventory_hostname in groups[glusterfs_client_group_name]

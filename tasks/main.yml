@@ -1,0 +1,45 @@
+---
+# tasks file for enqack.glusterfs
+
+- name: Gather os specific variables
+  include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml"
+    - "{{ ansible_distribution }}.yml"
+    - "{{ ansible_os_family }}.yml"
+
+- name: Add glusterfs repo key (Ubuntu)
+  apt_key:
+    keyserver: "{{ glusterfs_repo_info.keyserver }}"
+    id: "{{ glusterfs_repo_info.id }}"
+    state: present
+  when: ansible_distribution == "Ubuntu"
+
+- name: Add glusterfs repo key (Debian)
+  apt_key:
+    url: "{{ glusterfs_repo_info.key_url }}"
+    state: present
+  when: ansible_distribution == "Debian"
+
+- name: Add glusterfs apt repo
+  apt_repository:
+    repo: "{{ glusterfs_repo_info.repo }}"
+    state: present
+  when: ansible_os_family == "Debian"
+
+- include: install.yml
+
+- include: config_server.yml
+  when: >
+        config_glusterfs | bool and
+        groups[glusterfs_server_group_name] is defined and
+        inventory_hostname in groups[glusterfs_server_group_name]
+
+- include: config_client.yml
+  when: >
+        config_glusterfs | bool and
+        groups[glusterfs_client_group_name] is defined and
+        inventory_hostname in groups[glusterfs_client_group_name]
+
+- include: config_arbiter.yml
+  when: glusterfs_manage_arbiter_nodes | bool
