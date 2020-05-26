@@ -5,13 +5,13 @@
   service:
     name: "{{ glusterfs_glusterd_service }}"
     state: started
-    enable: true
+    enabled: true
 
 - name: enable glustereventsd
   service:
     name: "{{ glusterfs_glustereventsd_service }}"
     state: started
-    enable: true
+    enabled: true
   when: glusterfs_glustereventsd_service is defined
 
 - name: restart glusterd
